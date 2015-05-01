@@ -1,0 +1,145 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="NewsContainer">
+			<h:panelGrid columns="2">
+				<p:commandButton value="手工添加"
+					actionListener="#{newsView.prepareInsertNews()}"
+					oncomplete="PF('newsWidget').show();"
+					update=":NewsDialogForm:TradeItem" />
+			</h:panelGrid>
+			<p:dataScroller var="news" value="#{newsView.news}" id="News" chunkSize="10">
+			    <f:facet name="loader">
+                            <p:commandButton type="button" value="更多" icon="ui-icon-circle-triangle-s"/>
+                </f:facet>
+				<p:panel>
+					<f:facet name="header">
+					<h:panelGrid columns="1">
+					<h:outputText value="#{news.title}" />
+					<h:panelGrid columns="4">
+					<h:outputLabel value="重要性"/>
+						<p:rating value="#{news.importance}" readonly="true" />
+						<h:outputLabel value="创建时间"/>
+						<h:outputText value="#{news.time}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						<h:outputLabel value="开始时间"/>
+						<h:outputText value="#{news.beginTime}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						<h:outputLabel value="结束时间"/>
+						<h:outputText value="#{news.endTime}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						</h:panelGrid>
+					</h:panelGrid>
+					</f:facet>
+					<f:facet name="footer">
+					<h:panelGrid columns="2">
+					<h:outputLabel value="消息来源"/>
+					   <h:outputLink value="#{news.url}">
+					        <h:outputFormat value="#{news.url}"/>
+					   </h:outputLink>
+					   <h:outputLabel value="标签"/>
+					   <h:panelGrid columns="2">
+					    <ui:repeat var="label" value="#{news.labels}">
+					   <h:outputText value="#{label.name},"/>
+					   </ui:repeat>
+					   <p:commandButton actionListener="#{newsView.preChangeLabels(news,':NewsContainer:News')}" oncomplete="PF('labelWidget').show()" value="更改" update=":LabelDialogForm"/>
+					   </h:panelGrid>
+					</h:panelGrid>
+					</f:facet>
+					
+					<h:panelGrid columns="1">
+						<h:outputText value="#{news.content}" escape="false" />
+						<ui:repeat var="image" value="#{news.images}">
+							<p:graphicImage value="#{newsAttachmentView.streamedContent}"
+								style="max-width:1000px;max-height:500px">
+								<f:param id="attachment_id" name="attachment_id"
+									value="#{image.id}" />
+								<f:param id="view_id" name="view_id" value="#{newsView.viewId}" />
+								<f:param id="news_id" name="news_id" value="#{news.id}" />
+							</p:graphicImage>
+						</ui:repeat>
+						<h:panelGrid columns="2">
+							<p:outputLabel value="附件列表" />
+							<h:panelGroup>
+								<ui:repeat var="attachment" value="#{news.attachments}">
+									<p:commandLink value="#{attachment.filename}," ajax="false"
+										onclick="PrimeFaces.monitorDownload(start, stop);">
+										<p:fileDownload value="#{attachment.streamContent}" />
+									</p:commandLink>
+								</ui:repeat>
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panel>
+			</p:dataScroller>
+		</h:form>
+	</ui:define>
+	<ui:define name="dialogs">
+		<h:form id="NewsDialogForm">
+			<p:dialog header="新聞" widgetVar="newsWidget" modal="true"
+				id="TradeItem" height="500px">
+				<h:panelGrid columns="3" id="Labels">
+				<h:outputLabel value="标签"></h:outputLabel>
+				<ui:repeat var="label" value="#{newsView.item.labels}">
+				<h:outputText value="#{label.name},"></h:outputText>
+				</ui:repeat>
+				<p:commandButton actionListener="#{labelView.prepareLabels(newsView.item.labels,':NewsDialogForm:Labels')}" oncomplete="PF('labelWidget').show()" value="更改" update=":LabelDialogForm"/>
+				</h:panelGrid>
+				<h:panelGrid id="NewsPanel" columns="2" border="1" cellpadding="0"
+					cellspacing="2">
+					<h:outputLabel value="標題" />
+					<p:inputText value="#{newsView.item.title}" />
+					<h:outputLabel value="時間" />
+					<p:calendar value="#{newsView.item.time}"
+						pattern="MM/dd/yyyy HH:mm:ss" />
+						<h:outputLabel value="有效时间"/>
+						<h:panelGrid columns="3">
+						<p:calendar value="#{newsView.item.beginTime}" pattern="MM/dd/yyyy HH:mm:ss"/>
+						<h:outputText value="-"/>
+						<p:calendar value="#{newsView.item.endTime}" pattern="MM/dd/yyyy HH:mm:ss"/>
+						</h:panelGrid>
+						</h:panelGrid>
+						<h:panelGrid columns="1">
+					<h:outputLabel value="內容" />
+					<p:editor value="#{newsView.item.content}" rows="10" cols="100" />
+					<h:outputLabel value="附件" />
+					<h:panelGrid columns="1">
+						<h:panelGroup id="AttachmentItems">
+							<ui:repeat var="attachment" value="#{newsView.item.attachments}">
+								<p:commandLink value="#{attachment.filename}," ajax="false"
+									onclick="PrimeFaces.monitorDownload(start, stop);">
+									<p:fileDownload value="#{attachment.streamContent}" />
+								</p:commandLink>
+							</ui:repeat>
+						</h:panelGroup>
+						<p:fileUpload
+							fileUploadListener="#{newsView.uploadAttachmentFile}"
+							mode="advanced" auto="true" sizeLimit="10000000"
+							oncomplete="PF('newsWidget').show()"
+							allowTypes="/(\.|\/)(gif|jpe?g|png|zip|txt|docx?|xlsx?|ppt)$/"
+							update="AttachmentItems" />
+					</h:panelGrid>
+					<h:panelGrid columns="2">
+					<h:outputLabel value="消息源" />
+					<p:inputTextarea value="#{newsView.item.url}" cols="100" rows="2" />
+					<h:outputLabel value="重要性" />
+					<p:rating value="#{newsView.item.importance}" />
+					</h:panelGrid>
+				</h:panelGrid>
+				<h:panelGroup style="display:block; text-align:center">
+					<p:commandButton value="确定" actionListener="#{newsView.onSubmit}"
+						oncomplete="handleDialogSubmit(xhr, status, args,PF('newsWidget'))"
+						update="@form :NewsContainer:News" />
+				</h:panelGroup>
+			</p:dialog>
+	</h:form>
+	<ui:include src="../common/labelDialog.xhtml"/>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,24 @@
+<ui:composition 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<h:form id="LabelDialogForm">
+		<p:dialog widgetVar="labelWidget" modal="true" >
+		<p:messages showDetail="true" autoUpdate="true" closable="true"/>
+		 <h:panelGrid columns="2">
+		      <p:inputText value="#{labelView.label.name}"/>
+		      <p:commandButton value="添加" actionListener="#{labelView.onInsertLabel}" update="@form" oncomplete="PF('labelWidget').show()"></p:commandButton>
+		      </h:panelGrid>
+		      <p:pickList id="PojoPickList" value="#{labelView.targetLabels}" var="label" effect="bounce"
+                itemValue="#{label}" itemLabel="#{label.name}" showSourceControls="true" showTargetControls="true" showCheckbox="true"
+                showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="labelConverter">
+	          <p:column >
+	            <h:outputText value="#{label.name}" />
+	          </p:column>
+	        </p:pickList>
+		 <p:commandButton  update="@form #{labelView.updateIds}" value="提交" actionListener="#{labelView.onSubmit}"/>
+		</p:dialog>
+	</h:form>
+</ui:composition>

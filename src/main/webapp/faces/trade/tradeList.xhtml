@@ -1,0 +1,33 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<p:dataScroller value="#{tradeListView.trades}" var="trade"
+			chunkSize="10">
+			<p:panel>
+				<f:facet name="header">
+					<h:panelGrid columns="3" padding="5">
+						<h:outputText value="#{trade.createTime}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="GMT+8"></f:convertDateTime>
+						</h:outputText>
+						<h:outputLink value="viewTrade.xhtml">
+							<f:param name="trade.id" value="#{trade.id}" />
+							<h:outputText value="#{trade.title}" />
+						</h:outputLink>
+						<h:outputText value="#{trade.currency.name}" />
+					</h:panelGrid>
+				</f:facet>
+				<h:outputText value="#{trade.analyse}" escape="false"/>
+				<f:facet name="footer">
+				  <ui:repeat var="label" value="#{trade.labels}">
+				    <h:outputText value="#{label.name},"/>
+				  </ui:repeat>
+				</f:facet>
+			</p:panel>
+
+		</p:dataScroller>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,126 @@
+<ui:composition 
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<h:form id="NewsDialogForm">
+		<p:dialog widgetVar="selectNewsWidget" modal="true" width="1000px" dynamic="true">
+		<p:messages showDetail="true" autoUpdate="true" closable="true"/>
+		<p:dataTable id="NewsTable" var="news" value="#{newsSelectedView.availableNews}" selection="#{newsSelectedView.tempNews1}" rowKey="#{news.id}" style="margin-bottom:0">
+        <f:facet name="header">
+                                       所有可用消息
+        </f:facet>
+        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+        <p:column headerText="标示">
+            <h:outputText value="#{news.id}" />
+        </p:column>
+        <p:column headerText="时间">
+            <h:outputText value="#{news.time}" />
+        </p:column>
+         <p:column headerText="开始时间">
+            <h:outputText value="#{news.beginTime}" />
+        </p:column>
+         <p:column headerText="结束时间">
+            <h:outputText value="#{news.endTime}" />
+        </p:column>
+        <p:column headerText="标题">
+            <h:outputText value="#{news.title}" />
+        </p:column>
+        <p:column headerText="操作">
+            <p:commandButton value="查看" actionListener="#{newsSelectedView.selectNews(news)}" oncomplete="PF('viewNewsWidget').show()" update=":ViewNewsForm"/>
+        </p:column>
+    </p:dataTable>
+    <p:commandButton  value="添加" actionListener="#{newsSelectedView.addNews}" update="@form" oncomplete="PF('selectNewsWidget').show()"/>
+    <p:commandButton value="删除" actionListener="#{newsSelectedView.removeNews}" update="@form" oncomplete="PF('selectNewsWidget').show()"/>
+    <p:dataTable id="NewsSelectedTable" var="news" value="#{newsSelectedView.selectedNews}" selection="#{newsSelectedView.tempNews2}" rowKey="#{news.id}" style="margin-bottom:0">
+        <f:facet name="header">
+                                       所有可用消息
+        </f:facet>
+        <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+        <p:column headerText="标示">
+            <h:outputText value="#{news.id}" />
+        </p:column>
+        <p:column headerText="时间">
+            <h:outputText value="#{news.time}" />
+        </p:column>
+         <p:column headerText="开始时间">
+            <h:outputText value="#{news.beginTime}" />
+        </p:column>
+         <p:column headerText="结束时间">
+            <h:outputText value="#{news.endTime}" />
+        </p:column>
+        <p:column headerText="标题">
+            <h:outputText value="#{news.title}" />
+        </p:column>
+        <p:column headerText="操作">
+            <p:commandButton value="查看" actionListener="#{newsSelectedView.selectNews(news)}" oncomplete="PF('viewNewsWidget').show()" update=":ViewNewsForm"/>
+        </p:column>
+    </p:dataTable>
+    <p:commandButton value="确定" actionListener="#{newsSelectedView.onSubmit}" update="@form #{newsSelectedView.updateIds}" oncomplete="handleDialogSubmit(xhr, status, args,PF('selectNewsWidget'))"/>
+		</p:dialog>
+	</h:form>
+	<h:form id="ViewNewsForm">
+	  <p:dialog widgetVar="viewNewsWidget" modal="true" width="1000px">
+	    <p:panel>
+					<f:facet name="header">
+					<h:panelGrid columns="1">
+					<h:outputText value="#{newsSelectedView.news.title}" />
+					<h:panelGrid columns="4">
+					<h:outputLabel value="重要性"/>
+						<p:rating value="#{newsSelectedView.news.importance}" readonly="true" />
+						<h:outputLabel value="创建时间"/>
+						<h:outputText value="#{newsSelectedView.news.time}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						<h:outputLabel value="开始时间"/>
+						<h:outputText value="#{newsSelectedView.news.beginTime}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						<h:outputLabel value="结束时间"/>
+						<h:outputText value="#{newsSelectedView.news.endTime}">
+							<f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" timeZone="GMT+8" />
+						</h:outputText>
+						</h:panelGrid>
+					</h:panelGrid>
+					</f:facet>
+					<f:facet name="footer">
+					<h:panelGrid columns="2">
+					<h:outputLabel value="消息来源"/>
+					   <h:outputLink value="#{newsSelectedView.news.url}">
+					        <h:outputFormat value="#{newsSelectedView.news.url}"/>
+					   </h:outputLink>
+					   <h:outputLabel value="标签"/>
+					    <ui:repeat var="label" value="#{newsSelectedView.news.labels}">
+					   <h:outputText value="#{label.name},"/>
+					   </ui:repeat>
+					</h:panelGrid>
+					</f:facet>
+					
+					<h:panelGrid columns="1">
+						<h:outputText value="#{newsSelectedView.news.content}" escape="false" />
+						<ui:repeat var="image" value="#{newsSelectedView.news.images}">
+							<p:graphicImage value="#{newsAttachmentView.streamedContent}"
+								style="max-width:500px;max-height:200px">
+								<f:param id="attachment_id" name="attachment_id"
+									value="#{image.id}" />
+								<f:param id="view_id" name="view_id" value="#{newsView.viewId}" />
+								<f:param id="news_id" name="news_id" value="#{news.id}" />
+							</p:graphicImage>
+						</ui:repeat>
+						<h:panelGrid columns="2">
+							<p:outputLabel value="附件列表" />
+							<h:panelGroup>
+								<ui:repeat var="attachment" value="#{newsSelectedView.news.attachments}">
+									<p:commandLink value="#{attachment.filename}," ajax="false"
+										onclick="PrimeFaces.monitorDownload(start, stop);">
+										<p:fileDownload value="#{attachment.streamContent}" />
+									</p:commandLink>
+								</ui:repeat>
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panel>
+	  </p:dialog>
+	</h:form>
+</ui:composition>

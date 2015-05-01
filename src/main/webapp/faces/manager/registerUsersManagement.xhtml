@@ -1,0 +1,31 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="DataTable">
+			<p:dataTable 
+			    id="RegisteredDataTable"
+			    var="user" value="#{userRegisterManagerView.users}" rows="10"
+				paginator="true"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Id">
+					<h:outputText value="#{user.id}" />
+				</p:column>
+				<p:column headerText="Nickname">
+					<h:outputText value="#{user.nickname}" />
+				</p:column>
+				<p:column headerText="Email">
+					<h:outputText value="#{user.email}" />
+				</p:column>
+				<p:column headerText="Operation">
+				    <p:commandButton value="同意" update="@form" actionListener="#{userRegisterManagerView.agree(user)}"/>
+				    <p:commandButton value="不同意" update="@form" actionListener="#{userRegisterManagerView.unagree(user)}"/>
+				</p:column>
+			</p:dataTable>
+		</h:form>
+	</ui:define>
+</ui:composition>

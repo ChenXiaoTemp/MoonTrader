@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+<f:view>
+	<h:head>
+		<ui:insert name="javascripts">
+			<h:outputScript name="js/helper.js" />
+		</ui:insert>
+	</h:head>
+	<h:body>
+		<p:layout fullPage="true">
+			<p:layoutUnit position="west" resizable="true" size="400"
+				minSize="40" maxSize="200">
+				<p:menu>
+					<p:submenu label="Trade">
+						<p:menuitem value="Create Trade"
+							outcome="/faces/trade/createTrade.xhtml" />
+						<p:menuitem value="Diaries" outcome="/faces/trade/diary.xhtml" />
+						<p:menuitem value="Trades" outcome="/faces/trade/tradeList.xhtml" />
+						<p:menuitem value="History Trades"
+							outcome="/faces/trade/historyTradeList.xhtml" />
+						<p:menuitem value="News" outcome="/faces/news/viewNews.xhtml" />
+					</p:submenu>
+					<p:submenu label="System">
+						<p:menuitem value="Currencies"
+							outcome="/faces/system/currencyManagement.xhtml" />
+						<p:menuitem value="Operations"
+							outcome="/faces/system/operationManagement.xhtml" />
+						<p:menuitem value="Regesters"
+							outcome="/faces/manager/registerUsersManagement.xhtml"
+							rendered="#{loginView.manager}" />
+					</p:submenu>
+				</p:menu>
+			</p:layoutUnit>
+			<p:layoutUnit position="north">
+				<h:form>
+					<h:outputText value="#{loginView.user.nickname} 您好！" />
+					<p:commandButton value="登出" action="#{loginView.logout}" />
+				</h:form>
+			</p:layoutUnit>
+			<p:layoutUnit position="center">
+				<ui:insert name="content">Put default content here, if any.</ui:insert>
+			</p:layoutUnit>
+		</p:layout>
+		<ui:insert name="dialogs" />
+		<h:form id="Exception">
+			<p:dialog id="ExceptionDialog"
+				header="Exception '#{pfExceptionHandler.type}' occured!"
+				widgetVar="exceptionDialog" height="500px">
+        Message: #{pfExceptionHandler.message} <br />
+        StackTrace: <h:outputText
+					value="#{pfExceptionHandler.formattedStackTrace}" escape="false" />
+				<br />
+
+				<p:button onclick="document.location.href = document.location.href;"
+					value="Reload!"
+					rendered="#{pfExceptionHandler.type == 'javax.faces.application.ViewExpiredException'}" />
+			</p:dialog>
+		</h:form>
+		<h:form>
+			<p:dialog modal="true" widgetVar="statusDialog" showHeader="false"
+				draggable="false" closable="false" resizable="false" visible="false"
+				position="center" maximizable="false" minimizable="false">
+				<p:graphicImage value="#{resource['images/loading.gif']}"
+					title="loading" />
+			</p:dialog>
+		</h:form>
+	</h:body>
+</f:view>
+</html>

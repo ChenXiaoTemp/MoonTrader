@@ -1,0 +1,98 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="Diary">
+			<p:panel>
+				<p:commandButton value="确定" actionListener="#{diaryView.onSubmit}"
+					update="@form :DiariesForm:Diaries" style="float:right" />
+				<f:facet name="header">
+					<h:outputText value="写日记    #{diaryView.diary.time}">
+						<f:convertDateTime pattern="yyyy-MM-dd hh:mm"></f:convertDateTime>
+					</h:outputText>
+				</f:facet>
+				<h:panelGrid columns="2">
+					<p:outputLabel value="标题" />
+					<h:panelGrid columns="2">
+					<p:inputText value="#{diaryView.diary.title}" id="Diary_Title">
+                      <f:validateLength maxinum="256" mininum="1"/>
+					</p:inputText>
+					<p:message for="Diary_Title"/>
+					</h:panelGrid>
+					<p:outputLabel value="币种" />
+					<p:selectOneMenu value="#{diaryView.diary.currency.id}">
+						<f:selectItems value="#{diaryView.currencies}" var="currency"
+							itemLabel="#{currency.name}" itemValue="#{currency.id}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<ui:repeat var="image" value="#{diaryView.tempAttachments}">
+					<p:graphicImage value="#{diaryAttachmentView.streamedContent}" style="max-width:1000px;max-height:500px">
+						<f:param id="attachment_id" name="attachment_id" value="#{image}" />
+						<f:param id="view_id" name="view_id" value="#{diaryView.viewId}" />
+						<f:param id="diary_id" name="diary_id"
+							value="#{diaryView.diary.id}" />
+					</p:graphicImage>
+				</ui:repeat>
+				<p:editor value="#{diaryView.diary.content}" id="Content">
+				 <f:validateLength maxinum="4096"/>
+				</p:editor>
+				<p:message for="Content"/>
+				<p:fileUpload fileUploadListener="#{diaryView.uploadAttachmentFile}"
+					mode="advanced" auto="true" sizeLimit="10000000"
+					allowTypes="/(\.|\/)(gif|jpe?g|png|zip|txt|docx?|xlsx?|ppt)$/"
+					update="@form" />
+				<h:panelGrid columns="2">
+					<p:outputLabel value="附件列表" />
+					<h:panelGroup>
+						<ui:repeat var="attachment" value="#{diaryView.diary.attachments}">
+							<p:commandLink value="#{attachment.filename}," ajax="false"
+								onclick="PrimeFaces.monitorDownload(start, stop);">
+								<p:fileDownload value="#{attachment.streamContent}" />
+							</p:commandLink>
+						</ui:repeat>
+					</h:panelGroup>
+				</h:panelGrid>
+			</p:panel>
+		</h:form>
+		<h:form id="DiariesForm">
+			<p:dataScroller var="diary" value="#{diaryView.diaries}" id="Diaries">
+				<p:panel>
+					<f:facet name="header">
+						<h:outputText value="#{diary.time}">
+							<f:convertDateTime pattern="yyyy-MM-dd hh:mm"></f:convertDateTime>
+						</h:outputText>
+						<h:outputText value=" #{diary.currency.name} "
+							style="color:#FF0000" />
+						<h:outputText value="#{diary.title}" />
+					</f:facet>
+					<h:panelGrid columns="1">
+						<ui:repeat var="image" value="#{diary.images}">
+							<p:graphicImage value="#{diaryAttachmentView.streamedContent}" style="max-width:1000px;max-height:500px">
+								<f:param id="attachment_id" name="attachment_id"
+									value="#{image.id}" />
+								<f:param id="view_id" name="view_id" value="#{diaryView.viewId}" />
+								<f:param id="diary_id" name="diary_id"
+									value="#{diary.id}" />
+							</p:graphicImage>
+						</ui:repeat>
+						<h:outputText value="#{diary.content}" escape="false" />
+						<h:panelGrid columns="2">
+							<p:outputLabel value="附件列表" />
+							<h:panelGroup>
+								<ui:repeat var="attachment" value="#{diary.attachments}">
+									<p:commandLink value="#{attachment.filename}," ajax="false"
+										onclick="PrimeFaces.monitorDownload(start, stop);">
+										<p:fileDownload value="#{attachment.streamContent}" />
+									</p:commandLink>
+								</ui:repeat>
+							</h:panelGroup>
+						</h:panelGrid>
+					</h:panelGrid>
+				</p:panel>
+			</p:dataScroller>
+		</h:form>
+	</ui:define>
+</ui:composition>

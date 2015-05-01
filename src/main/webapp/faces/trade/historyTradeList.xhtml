@@ -1,0 +1,24 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		 <p:dataScroller value="#{historyTradeListView.historyTrades}" var="trade" chunkSize="10">
+					<h:panelGrid columns="6">
+					  <p:outputLabel value="标题:"/>
+					  <h:outputLink value="viewTrade.xhtml">
+					      <f:param name="trade.id" value="#{trade.id}" />
+					      <h:outputText value="#{trade.title}"/>
+					  </h:outputLink>
+					  <p:outputLabel value="货币:"/>
+					  <h:outputText value="#{trade.currency.name}" />
+					  <p:outputLabel value="分析:"/>
+					</h:panelGrid>
+					  <h:panelGroup style="text-align:center">
+					   <h:outputText value="#{trade.analyse}" />
+					  </h:panelGroup>
+		</p:dataScroller>
+	</ui:define>
+</ui:composition>

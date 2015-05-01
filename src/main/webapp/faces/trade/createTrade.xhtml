@@ -1,0 +1,162 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="Trade">
+			<h:panelGroup style="display:block; text-align:right">
+				<p:commandButton value="添加订单计划" update=":TradeItemDialog:TradeItem"
+					actionListener="#{tradeView.insertItem}"
+					oncomplete="PF('tradeItemWidget').show();" />
+				<p:commandButton value="添加消息" 
+				    update=":NewsDialogForm" 
+				    process="@this"
+				    actionListener="#{tradeView.prepareAddNews(':Trade:NewsTable')}"
+				    oncomplete="PF('selectNewsWidget').show()"/>
+				<p:commandButton value="创建" action="#{tradeView.create}"
+					ajax="false" />
+			</h:panelGroup>
+			<h:panelGrid columns="2">
+				<p:outputLabel value="标题" />
+				<h:panelGrid columns="2">
+				<h:inputText value="#{tradeView.trade.title}" id="Title" validationMessage="长度应该在1-256之间">
+				   <f:validateLength maximum="256" minimum="1"/>
+				</h:inputText>
+				<p:message for="Title"/>
+				</h:panelGrid>
+				<p:outputLabel value="货币" />
+				<p:selectOneMenu value="#{tradeView.trade.currency.id}" required="true">
+					<f:selectItems value="#{tradeView.currencies}" var="cu"
+						itemLabel="#{cu.name}" itemValue="#{cu.id}" />
+				</p:selectOneMenu>
+				<p:outputLabel value="有效时间" />
+				<h:panelGrid columns="3">
+					<p:calendar value="#{tradeView.trade.beginTime}"
+						pattern="dd-MM-yyyy hh:mm" />
+					<h:outputText value="-" />
+					<p:calendar value="#{tradeView.trade.endTime}"
+						pattern="dd-MM-yyyy hh:mm" />
+				</h:panelGrid>
+			</h:panelGrid>
+			<p:panel id="Images">
+			<ui:repeat var="image" value="#{tradeView.tempAttachments}">
+				<p:graphicImage value="#{tradeAttachmentView.streamedContent}" style="max-width:1000px;max-height:500px">
+					<f:param id="attachment_id" name="attachment_id" value="#{image}" />
+					<f:param id="view_id" name="view_id" value="#{tradeView.viewId}" />
+					<f:param id="trade_id" name="trade_id"
+						value="#{tradeView.trade.id}" />
+				</p:graphicImage>
+			</ui:repeat>
+			</p:panel>
+			<p:editor value="#{tradeView.trade.analyse}" validationMessage="长度应少于4096" id="Analyse">
+			    <f:validateLength maxnum="4096"/>
+			</p:editor>
+			<p:message for="Analyse"/>
+			<p:fileUpload fileUploadListener="#{tradeView.uploadAttachmentFile}"
+				mode="advanced" auto="true" sizeLimit="10000000"
+				allowTypes="/(\.|\/)(gif|jpe?g|png|zip|txt|docx?|xlsx?|ppt)$/"
+				update="Images Attachments"/>
+			<h:panelGrid columns="2" id="Attachments">
+				<p:outputLabel value="附件列表" />
+				<h:panelGroup>
+					<ui:repeat var="attachment" value="#{tradeView.trade.attachments}">
+						<p:commandLink value="#{attachment.filename}," ajax="false"
+							onclick="PrimeFaces.monitorDownload(start, stop);">
+							<p:fileDownload value="#{attachment.streamContent}" />
+						</p:commandLink>
+					</ui:repeat>
+				</h:panelGroup>
+			</h:panelGrid>
+			<p:panel>
+			<f:facet name="header">
+			<h:outputText value="条目"/>
+			</f:facet>
+			<p:dataScroller value="#{tradeView.trade.items}" var="item"
+				chunkSize="10" id="Items">
+				<h:panelGrid columns="2">
+					<p:outputLabel value="标题" />
+					<h:outputText value="#{item.title}" />
+					<p:outputLabel value="价格" />
+					<h:outputText value="#{item.price}" />
+					<p:outputLabel value="操作" />
+					<h:outputText value="#{item.operation.name}" />
+					<p:outputLabel value="分析" />
+					<h:outputText value="#{item.analyse}" escape="false"/>
+					<h:panelGroup>
+						<p:commandButton icon="ui-icon-pencil"
+							actionListener="#{tradeView.changeItem(item)}" process="@this"
+							oncomplete="PF('tradeItemWidget').show();" update="@form" />
+						<p:commandButton icon="ui-icon-circle-close"
+							actionListener="#{tradeView.deleteItem(item)}" update="@form" process="@this" />
+					</h:panelGroup>
+				</h:panelGrid>
+			    </p:dataScroller>
+			</p:panel>
+			<p:panel>
+			<f:facet name="header">
+			<h:outputText value="新闻"/>
+			</f:facet>
+			<p:dataTable id="NewsTable" var="news" value="#{tradeView.trade.newsItems}" rowKey="#{news.id}" style="margin-bottom:0">
+               <p:column headerText="标题">
+               <h:outputText value="#{news.title}"/>
+               </p:column>			
+               <p:column headerText="重要性">
+                <p:rating value="#{news.importance}"></p:rating>
+               </p:column>
+               <p:column headerText="开始时间">
+               <h:outputText value="#{news.beginTime}">
+                  <f:convertDateTime pattern="yyyy-MM-dd hh:mm" timeZone="GMT+8"></f:convertDateTime>
+               </h:outputText>
+               </p:column>
+               <p:column headerText="结束时间">
+               <h:outputText value="#{news.endTime}">
+                  <f:convertDateTime pattern="yyyy-MM-dd hh:mm" timeZone="GMT+8"></f:convertDateTime>
+               </h:outputText>
+               </p:column>
+			</p:dataTable>
+			</p:panel>
+		</h:form>
+	</ui:define>
+	<ui:define name="dialogs">
+		<h:form id="TradeItemDialog">
+			<p:dialog header="看单" widgetVar="tradeItemWidget" modal="true"
+				id="TradeItem">
+				<h:panelGrid id="TradeItemPanel" columns="2" border="1"
+					cellpadding="0" cellspacing="2">
+					<p:outputLabel value="标题" />
+					<h:panelGrid columns="2">
+					<p:inputText value="#{tradeView.tradeItem.title}" id="Item_Title">
+					  <f:validateLength maxinum="256" minimum="1"/>
+					</p:inputText>
+					<p:message for="Item_Title"/>
+					</h:panelGrid>
+					<p:outputLabel value="价格" />
+					<p:inputText value="#{tradeView.tradeItem.price}" />
+					<p:outputLabel value="操作" />
+					<p:selectOneMenu value="#{tradeView.tradeItem.operation.id}"
+						required="true" requiredMessage="请选择方向">
+						<f:selectItems value="#{tradeView.operations}" var="operation"
+							itemValue="#{operation.id}" itemLabel="#{operation.name}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+				<h:panelGrid columns="1">
+					<p:outputLabel value="分析" />
+					<p:editor id="Item_Analyse" value="#{tradeView.tradeItem.analyse}"
+						widgetVar="editorWidget" width="600" >
+					  <f:validateLength maxinum="4096" />
+					</p:editor>
+					<p:message for="Item_Analyse"></p:message>
+				</h:panelGrid>
+				<h:panelGroup style="display:block; text-align:center">
+					<p:commandButton value="确定"
+						actionListener="#{tradeView.onComplete}"
+						oncomplete="handleDialogSubmit(xhr, status, args,PF('tradeItemWidget'))"
+						update="@form :Trade:Items" />
+				</h:panelGroup>
+			</p:dialog>
+		</h:form>
+		<ui:include src="../common/newsDialog.xhtml"></ui:include>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,51 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="DataTable">
+			<p:dataTable 
+			    id="CurrencyDataTable"
+			    var="currency" value="#{currencyManagementView.currencies}" rows="10"
+				paginator="true"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Id">
+					<h:outputText value="#{currency.id}" />
+				</p:column>
+				<p:column headerText="Name">
+					<h:outputText value="#{currency.name}" />
+				</p:column>
+				
+				<p:column headerText="Operation">
+				    <p:commandButton value="修改" update=":CurrencyDialog:CurrencySettingPanel" actionListener="#{currencyManagementView.changeCurrency(currency)}" oncomplete="PF('currencyWidget').show()"/>
+				</p:column>
+				
+				<f:facet name="footer">
+				   <p:commandButton value="添加" update=":CurrencyDialog:CurrencySettingPanel" actionListener="#{currencyManagementView.insertCurrency()}" oncomplete="PF('currencyWidget').show()"/>
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+	</ui:define>
+	<ui:define name="dialogs">
+		<h:form id="CurrencyDialog">
+			<p:dialog header="币种设置" widgetVar="currencyWidget" modal="true">
+				<h:panelGrid id="CurrencySettingPanel" columns="2" border="1"
+					cellpadding="0" cellspacing="2">
+					<p:outputLabel value="名称" />
+					<p:inputText value="#{currencyManagementView.currency.name}" />
+					<f:facet name="footer">
+					<h:panelGroup style="display:block; text-align:center">
+				<p:commandButton value="确定"
+				 actionListener="#{currencyManagementView.onSubmit}" 
+				 oncomplete="PF('currencyWidget').hide()"
+				 update=":DataTable:CurrencyDataTable"/>
+				 </h:panelGroup>
+				</f:facet>
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

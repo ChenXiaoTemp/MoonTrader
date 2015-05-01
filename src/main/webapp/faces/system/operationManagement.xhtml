@@ -1,0 +1,49 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="DataTable">
+			<p:dataTable 
+			    id="OperationDataTable"
+			    var="operation" value="#{operationManagementView.operations}" rows="10"
+				paginator="true"
+				paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15">
+				<p:column headerText="Id">
+					<h:outputText value="#{operation.id}" />
+				</p:column>
+				<p:column headerText="Name">
+					<h:outputText value="#{operation.name}" />
+				</p:column>
+				<p:column headerText="Operation">
+				    <p:commandButton value="修改" actionListener="#{operationManagementView.change(operation)}" update=":OperationDialog:OperationSettingPanel" oncomplete="PF('operationWidget').show()"/>
+				</p:column>
+				<f:facet name="footer">
+				   <p:commandButton value="添加" actionListener="#{operationManagementView.insert()}" update=":OperationDialog:OperationSettingPanel" oncomplete="PF('operationWidget').show()"/>
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+	</ui:define>
+	<ui:define name="dialogs">
+		<h:form id="OperationDialog">
+			<p:dialog header="操作设置" widgetVar="operationWidget" modal="true">
+				<h:panelGrid id="OperationSettingPanel" columns="2" border="1"
+					cellpadding="0" cellspacing="2">
+					<p:outputLabel value="操作名称" />
+					<p:inputText value="#{operationManagementView.operation.name}" />
+					<f:facet name="footer">
+					<h:panelGroup style="display:block; text-align:center">
+				<p:commandButton value="确定"
+				 actionListener="#{operationManagementView.onSubmit}" 
+				 oncomplete="PF('operationWidget').hide()"
+				 update=":DataTable:OperationDataTable"/>
+				 </h:panelGroup>
+				</f:facet>
+				</h:panelGrid>
+			</p:dialog>
+		</h:form>
+	</ui:define>
+</ui:composition>

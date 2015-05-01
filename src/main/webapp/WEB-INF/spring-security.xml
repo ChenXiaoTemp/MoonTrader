@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+    <!-- Enable method level Spring Security by annotations  -->
+    <sec:http auto-config="true" use-expressions="true">
+    <sec:intercept-url pattern="/faces/register/**" access="hasRole('ROLE_REGISTERED')" />
+        <!-- Page level Spring Security : Intercept access to resources in /pages/secure/** -->
+        <sec:intercept-url pattern="/faces/system/**" access="hasRole('ROLE_USER')" />
+        <!-- Page level Spring Security : Permit access to resources in /pages/unsecure/** -->
+        <sec:intercept-url pattern="/faces/trade/**" access="hasRole('ROLE_USER')"/>
+        <sec:intercept-url pattern="/faces/manager/**" access="hasRole('ROLE_MANAGER')"/>
+        <!-- Page level Spring Security : Intercept access to resources in /** -->
+        <sec:intercept-url pattern="/faces/users/**" access="permitAll"/>
+          <sec:intercept-url pattern="/faces/news/**" access="permitAll"/>
+        <!-- Page level Spring Security : Enable Primefaces -->
+        <sec:intercept-url pattern="/javax.faces.resource/**" access="permitAll"/>
+        <!-- Define login page for Spring Security -->      
+        <sec:form-login login-page="/faces/users/login.xhtml"/>
+        <!-- Define logout properties for Spring Security -->
+        <sec:logout invalidate-session="true" delete-cookies="true" logout-success-url="/faces/users/login.xhtml"></sec:logout>
+    </sec:http>
+    
+   
+    <!-- Set customUserDetailsService class as the authentication Manager for Spring Security-->
+    <sec:authentication-manager alias="authenticationManager">
+        <sec:authentication-provider user-service-ref="customUserDetailsService">
+            <sec:password-encoder hash="md5"></sec:password-encoder>
+        </sec:authentication-provider>
+    </sec:authentication-manager>
+
+</beans>

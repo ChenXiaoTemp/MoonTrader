@@ -1,0 +1,231 @@
+<ui:composition template="/faces/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+	<ui:define name="content">
+		<h:form id="ContentForm">
+			<h:panelGrid columns="2">
+			    <h:outputLabel value="标签"></h:outputLabel>
+				<h:panelGrid columns="2" id="Labels">
+				<ui:repeat var="label" value="#{viewTradeView.trade.labels}">
+				<h:outputText value="#{label.name},"></h:outputText>
+				</ui:repeat>
+				  <p:commandButton actionListener="#{labelView.prepareLabels(viewTradeView.trade.labels,':ContentForm:Labels')}" oncomplete="PF('labelWidget').show()" value="更改" update=":LabelDialogForm"/>
+				</h:panelGrid>
+				<p:outputLabel value="标题" />
+				<h:outputText value="#{viewTradeView.trade.title}" />
+				<p:outputLabel value="货币" />
+				<h:outputText value="#{viewTradeView.trade.currency.name}" />
+				<p:outputLabel value="有效时间" />
+				<h:panelGrid columns="3">
+					<h:outputText value="#{viewTradeView.trade.beginTime}">
+						<f:convertDateTime pattern="yyyy-MM-dd hh:mm"></f:convertDateTime>
+					</h:outputText>
+					<h:outputText value="-" />
+					<h:outputText value="#{viewTradeView.trade.endTime}">
+						<f:convertDateTime pattern="yyyy-MM-dd hh:mm"></f:convertDateTime>
+					</h:outputText>
+				</h:panelGrid>
+				<p:outputLabel value="状态" />
+				<h:panelGrid columns="2">
+				   <h:outputText value="#{viewTradeView.trade.state==0?'开启':'关闭'}"
+					  id="State" />
+				   <p:commandButton actionListener="#{viewTradeView.close}" value="关闭"
+					  update="@form" rendered="#{viewTradeView.trade.state eq 0}" />
+			     </h:panelGrid>
+				
+			</h:panelGrid>
+			<ui:repeat var="image" value="#{viewTradeView.trade.images}">
+				<p:graphicImage value="#{tradeAttachmentView.streamedContent}"
+					style="max-width:1000px;max-height:500px">
+					<f:param id="attachment_id" name="attachment_id"
+						value="#{image.id}" />
+					<f:param id="view_id" name="view_id"
+						value="#{viewTradeView.viewId}" />
+					<f:param id="trade_id" name="trade_id"
+						value="#{viewTradeView.trade.id}" />
+				</p:graphicImage>
+			</ui:repeat>
+			<br />
+			<h:outputText value="交易分析：" />
+			<h:outputText value="#{viewTradeView.trade.analyse}" escape="false" />
+			<h:panelGrid columns="2" id="Attachments">
+				<p:outputLabel value="附件列表" />
+				<h:panelGroup>
+					<ui:repeat var="attachment"
+						value="#{viewTradeView.trade.attachments}">
+						<p:commandLink value="#{attachment.filename}," ajax="false"
+							onclick="PrimeFaces.monitorDownload(start, stop);">
+							<p:fileDownload value="#{attachment.streamContent}" />
+						</p:commandLink>
+					</ui:repeat>
+				</h:panelGroup>
+			</h:panelGrid>
+			<p:panel>
+				<f:facet name="header">交易记录</f:facet>
+				<p:dataScroller value="#{viewTradeView.trade.items}" var="item"
+					chunkSize="10">
+					<h:panelGrid columns="2">
+						<p:outputLabel value="标题:" />
+						<h:outputText value="#{item.title}" />
+						<p:outputLabel value="价格:" />
+						<h:outputText value="#{item.price}" />
+						<p:outputLabel value="操作:" />
+						<h:outputText value="#{item.operation.name}" />
+					</h:panelGrid>
+					<h:panelGroup style="text-align:center">
+						<h:outputText value="#{item.analyse}" escape="false" />
+					</h:panelGroup>
+				</p:dataScroller>
+			</p:panel>
+			<p:panel>
+			<f:facet name="header">
+			<h:outputText value="新闻"/>
+			</f:facet>
+			<p:dataTable id="NewsTable" var="news" value="#{viewTradeView.trade.newsItems}" rowKey="#{news.id}" style="margin-bottom:0">
+               <p:column headerText="标题">
+               <h:outputText value="#{news.title}"/>
+               </p:column>			
+               <p:column headerText="重要性">
+                <p:rating value="#{news.importance}"></p:rating>
+               </p:column>
+               <p:column headerText="开始时间">
+               <h:outputText value="#{news.beginTime}">
+                  <f:convertDateTime pattern="yyyy-MM-dd hh:mm" timeZone="GMT+8"></f:convertDateTime>
+               </h:outputText>
+               </p:column>
+               <p:column headerText="结束时间">
+               <h:outputText value="#{news.endTime}">
+                  <f:convertDateTime pattern="yyyy-MM-dd hh:mm" timeZone="GMT+8"></f:convertDateTime>
+               </h:outputText>
+               </p:column>
+               <p:column headerText="操作">
+               <p:commandButton actionListener="#{viewTradeView.deleteNews(news)}" value="删除" update=":ContentForm:NewsTable">
+                  <p:confirm header="Confirmation" message="確定刪除?" icon="ui-icon-alert" />
+               </p:commandButton>
+               <p:commandButton actionListener="#{viewTradeView.viewNews(news)}" update=":ViewNewsForm" value="查看" oncomplete="PF('viewNewsWidget').show()"/>
+               </p:column>
+               <f:facet name="footer">
+                  <p:commandButton actionListener="#{viewTradeView.preInsertNews(':ContentForm:NewsTable')}"
+                   update=":NewsDialogForm"
+                   value="添加" oncomplete="PF('selectNewsWidget').show()"/>
+               </f:facet>
+			</p:dataTable>
+			</p:panel>
+			<p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+                  <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                  <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+            </p:confirmDialog>
+		</h:form>
+		<h:form id="CommentsForm">
+			<p:growl id="messages" showDetail="true" />
+			<p:panel>
+				<f:facet name="header">评论</f:facet>
+				<p:dataScroller value="#{viewTradeView.trade.comments}"
+					var="comment" chunkSize="5">
+					<f:facet name="loader">
+                            <p:commandButton type="button" value="更多" icon="ui-icon-circle-triangle-s"/>
+                    </f:facet>
+ 
+					<h:outputText value="#{comment.time}" style="font-weight: bold">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+					</h:outputText>
+					<h:panelGroup>
+						<ui:repeat value="#{comment.images}" var="image" chunkSize="3">
+							<p:panelGrid columns="1">
+								<p:graphicImage value="#{commentAttachmentView.image}"
+									style="max-width:1000px;max-height:500px">
+									<f:param id="attachment_id" name="attachment_id"
+										value="#{image.id}" />
+									<f:param id="view_id" name="view_id"
+										value="#{viewTradeView.viewId}" />
+									<f:param id="comment_id" name="comment_id"
+										value="#{comment.id}" />
+								</p:graphicImage>
+							</p:panelGrid>
+						</ui:repeat>
+					</h:panelGroup>
+					<h:panelGrid columns="2" cellpadding="5">
+						<h:outputText value="内容:" />
+						<h:outputText value="#{comment.content}" escape="false" />
+						<p:outputLabel value="附件：" />
+						<h:panelGroup>
+							<ui:repeat value="#{comment.attachments}" var="attachment">
+								<p:commandLink value="#{attachment.filename}," ajax="false"
+									onclick="PrimeFaces.monitorDownload(start, stop);"
+									rendered="#{attachment.validFile}">
+									<p:fileDownload value="#{attachment.streamContent}" />
+								</p:commandLink>
+								<h:outputText value="#{attachment.filename} invalid file."
+									rendered="#{not attachment.validFile}" />
+							</ui:repeat>
+						</h:panelGroup>
+					</h:panelGrid>
+					<br />
+					<br />
+					<br />
+				</p:dataScroller>
+				<p:commandButton value="添加评论"
+					actionListener="#{viewTradeView.beginComment}" update="@form" />
+				<h:panelGroup>
+					<h:panelGrid columns="1" style="width:100%"
+						columnClasses="logo,detail"
+						rendered="#{viewTradeView.editComment}" id="EditComment">
+						<h:panelGroup id="Images">
+							<ui:repeat var="image" value="#{viewTradeView.tempAttachments}"
+								chunkSize="3">
+								<p:graphicImage value="#{commentAttachmentView.image}"
+									style="max-width:1000px;max-height:500px">
+									<f:param id="attachment_id" name="attachment_id"
+										value="#{image}" />
+									<f:param id="view_id" name="view_id"
+										value="#{viewTradeView.viewId}" />
+									<f:param id="comment_id" name="comment_id"
+										value="#{viewTradeView.comment.id}" />
+								</p:graphicImage>
+							</ui:repeat>
+						</h:panelGroup>
+						<p:outputPanel>
+							<h:panelGrid columns="1">
+								<p:editor value="#{viewTradeView.comment.content}"
+									widgetVar="commentEditorWidget" id="Comment_Content">
+									<f:validateLength maxinum="4096" />
+								</p:editor>
+								<p:message for="Comment_Content" />
+								<p:fileUpload value="添加附件"
+									fileUploadListener="#{viewTradeView.uploadAttachmentFile}"
+									mode="advanced" auto="true" update="Images"
+									sizeLimit="10000000"
+									allowTypes="/(\.|\/)(gif|jpe?g|png|xlsx|xls|ods|doc|docx|ppt|txt)$/" />
+								<h:panelGrid columns="2" cellpadding="5" style="width:100%">
+									<h:outputText value="#{viewTradeView.comment.time}"
+										style="font-weight: bold">
+										<f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss" />
+									</h:outputText>
+									<p:commandButton value="提交"
+										action="#{viewTradeView.addComment}" ajax="false"
+										update="@form" style="right:0%" />
+								</h:panelGrid>
+							</h:panelGrid>
+							<ui:repeat value="#{viewTradeView.comment.attachments}"
+								var="attachment">
+								<h:panelGrid columns="2">
+									<p:commandLink value="{attachment.filename}," ajax="false"
+										onclick="PrimeFaces.monitorDownload(start, stop);">
+										<p:fileDownload value="#{attachment.file}" />
+									</p:commandLink>
+								</h:panelGrid>
+							</ui:repeat>
+						</p:outputPanel>
+					</h:panelGrid>
+				</h:panelGroup>
+			</p:panel>
+		</h:form>
+	</ui:define>
+	<ui:define name="dialogs">
+	   <ui:include src="../common/labelDialog.xhtml"></ui:include>
+	   <ui:include src="../common/newsDialog.xhtml"></ui:include>
+	</ui:define>
+</ui:composition>
