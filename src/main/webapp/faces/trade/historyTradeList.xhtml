@@ -16,8 +16,8 @@
 					  <h:outputText value="#{trade.currency.name}" />
 					  <p:outputLabel value="分析:"/>
 					</h:panelGrid>
-					  <h:panelGroup style="text-align:center">
-					   <h:outputText value="#{trade.analyse}" />
+					  <h:panelGroup >
+					   <h:outputText value="#{trade.analyse}" escape="false"/>
 					  </h:panelGroup>
 		</p:dataScroller>
 	</ui:define>
